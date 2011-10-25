@@ -1,11 +1,11 @@
 from django.db import models
 
 class Article(models.Model):
-    title = CharField(max_length=100, required=True)
-    text = TextField(required=True)
+    title = models.CharField(max_length=100)
+    text = models.TextField()
 
-    pub_datetime = DatetimeField(auto_now_add=True)
-    mod_datetime = DatetimeField(auto_now=True, auto_now_add=True)
+    pub_datetime = models.DateTimeField(auto_now_add=True)
+    mod_datetime = models.DateTimeField(auto_now=True, auto_now_add=True)
 
     def tags_as_ul(self, filter=None):
         if(type(filter) == str):
@@ -18,58 +18,59 @@ class Article(models.Model):
         ret += '</ul>'
         return ret
 
-    def comment_as_ul(self, page=1, size=10, filter=None):
+    def comments_count(self, filter=None):
         if(type(filter) == str):
-            tags = self.comment_set.filter(filter)
+            return len(self.comment_set.filter(filter))
         else:
-            tags = self.tag_set.all()
-        from django.core.paginator import Paginator
-        comments = Paginator(tags, 
+            return self.comment_set.count()
+
+    def tags_count(self):
+        return len(self.tag_set.count())
 
     def __unicode__(self):
         return self.title
 
 class Comment(models.Model):
-    name = CharField(max_length=100, required=True)
-    email = EmailField(max_length=100, required=True)
-    text = TextField(required=True)
-    parent = ForeignKey('self') 
-    article = ForeignKey(Article, related_name="comment_set")
+    name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100)
+    text = models.TextField()
+    parent = models.ForeignKey('self') 
+    article = models.ForeignKey(Article, related_name="comment_set")
 
-    pub_datetime = DatetimeField(auto_now_add=True)
+    pub_datetime = models.DateTimeField(auto_now_add=True)
 
 
     def __unicode__(self):
         return self.name
 
 class Tag(models.Model):
-    name = CharField(max_length=100, required=True)
-    parent = ForeignKey('self')
-    article = ManyToManyField(Comment, related_name="tag_set")
+    name = models.CharField(max_length=100)
+    parent = models.ForeignKey('self')
+    article = models.ManyToManyField(Comment, related_name="tag_set")
 
-    pub_datetime = DatetimeField(auto_now_add=True)
-    mod_datetime = DatetimeField(auto_now=True, auto_now_add=True)
+    pub_datetime = models.DateTimeField(auto_now_add=True)
+    mod_datetime = models.DateTimeField(auto_now=True, auto_now_add=True)
 
     def __unicode__(self):
         return self.name
 
 class Widget(models.Model):
-    name = CharField(max_length=100, required=True)
-    template = FilePathField(required=True)
-    css = FilePathField()
+    name = models.CharField(max_length=100)
+    template = models.FilePathField()
+    css = models.FilePathField()
 
-    pub_datetime = DatetimeField(auto_now_add=True)
-    mod_datetime = DatetimeField(auto_now=True, auto_now_add=True)
+    pub_datetime = models.DateTimeField(auto_now_add=True)
+    mod_datetime = models.DateTimeField(auto_now=True, auto_now_add=True)
 
     def __unicode__(self):
         return self.name
 
 class Theme(models.Model):
-    name = CharField(max_length=100, required=True)
-    css = FilePathField(required=True)
+    name = models.CharField(max_length=100)
+    css = models.FilePathField()
 
-    pub_datetime = DatetimeField(auto_now_add=True)
-    mod_datetime = DatetimeField(auto_now=True, auto_now_add=True)
+    pub_datetime = models.DateTimeField(auto_now_add=True)
+    mod_datetime = models.DateTimeField(auto_now=True, auto_now_add=True)
 
     def __unicode__(self):
         return self.name
